@@ -1,0 +1,43 @@
+<div class="left-bar">
+    <div>
+        <h1> {{ userName }} </h1>
+    </div>
+    <div>
+        <div [formGroup]="loginForm">
+             <mat-form-field class="tp-full-width">
+                <input matInput placeholder="Email" formControlName="email">
+            </mat-form-field>
+            <mat-form-field class="tp-full-width">
+                <input matInput type="password" placeholder="Password" formControlName="password">
+            </mat-form-field>
+        </div>
+        <div>
+            
+        </div>
+    </div>
+    <div> 
+        <form [formGroup]="stockForm">
+            <h2>Select Stock: </h2>
+            <mat-form-field>
+                <mat-select formControlName="selectedStockControl" placeholder="Stock" class="mat-select-stuff" (ngModelChange)="changeStock($event)">
+                    <input matInput style="height:20%;font-size:large;width:90%;padding-left:7%;color:lightgrey;" type="text" (keydown)="onKey($any($event.target).value)">
+                    <mat-option class="mat-select-stuff" *ngFor="let stock of stocks" [value]="stock">{{this.stock.viewValue}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <h2>Select Timeframe: </h2>
+            <mat-form-field>
+                <mat-select formControlName="selectedTimeFrameControl" placeholder="Time Frame" class="mat-select-stuff" (ngModelChange)="changeTimeFrame($event)">
+                    <mat-option class="mat-select-stuff" *ngFor="let TimeFrame of timeFrames" [value]="TimeFrame">{{this.TimeFrame.viewValue}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <div *ngIf="patternScore != 0">
+                <h2>Pattern accuracy score: </h2>
+                <mat-card>
+                    <mat-card-content formControlName="patternScore">
+                        {{patternScore}}%
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </form> 
+    </div>
+</div>

@@ -1,0 +1,78 @@
+.chart-container {
+    width: 84%;
+    height: 67%;
+    display: flex;
+    //padding-left: 10%;
+    //padding-left: 25%;
+    align-items: left;
+    //margin: auto;
+}
+
+h2 {
+    color: black;
+    display: flex;
+    text-align: center;
+    //padding-left: 45%;
+    padding-top: 3%;
+    padding-bottom: 4%;
+    font-size: 80px;
+}
+
+h3 {
+    color: midnightblue;
+    font-style:normal;
+    font-size: larger;
+}
+
+p {
+    color: black;
+}
+
+.wholePage {
+    width: 100%;
+    height: 120%;
+    top: 0;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    background-image: url('../assets/greenBackground2.jpg');
+    background-size: cover;
+    //background-attachment: scroll;
+}
+
+.blockquote.construction {
+    border-left: none;
+}
+
+.mainBar {
+    //display: flex;
+    align-items: left;
+}
+
+p {
+    padding-top: 4%;
+    width: 12%;
+}
+
+.left-bar {
+    padding-right: 2%;
+}
+
+:host ::ng-deep .mat-progress-spinner circle, .mat-spinner circle {   
+    stroke: black;
+}
+
+.score {
+    width: 50%;
+    align-items: center;
+    //height: 50px;
+    display: flex;
+    padding-left: 2%;      
+    padding-top: 0.3%;
+    padding-bottom: 0.3%;
+    border: 5px solid rgb(150,100,255);
+    border-width: 3px;
+    border: 2px solid;
+   // box-shadow: 1px 1px 5px 1px;
+   // border-radius: 10px;
+}

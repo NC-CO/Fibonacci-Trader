@@ -1,0 +1,40 @@
+.left-bar {
+   // display:initial;
+    align-items: left;
+    padding-top: 10%;
+    padding-left: 15px;
+    width: 170px;
+}
+
+.mat-select-stuff{
+    display:flex;
+    //width:100%;
+    //background-color: red;
+    //font-size: 25px;   
+    //padding-left: 5%;
+}
+
+h1 {
+    color: black;
+}
+
+h2 {
+    color: black;
+    text-align: left;
+}
+
+h3 {
+    color: black;
+    font-size: 29;
+}
+
+:host ::ng-deep .dropDownSeachBox .mat-form-field-outline .mat-form-field-outline-star {
+    font-size: large;
+    font-style: italic;
+}
+
+
+.mat-select-panel {
+    background: red;
+    height: 700px;
+}
