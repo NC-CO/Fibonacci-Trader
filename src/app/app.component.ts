@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import * as testData from '../assets/test.json';
 import Chart from 'chart.js/auto';
 import { DatePipe } from '@angular/common';
+import { CookieService } from 'ngx-cookie-service';
 
 interface Stock {
   value: string;
@@ -80,7 +81,7 @@ export class AppComponent {
   score = 0;
   datasets: Array<{label:string, data: Array<{x:string, y:number}>, borderColor: string, fill: boolean, backgroundColor: string, pointBackgroundColor: string, borderDash: [number, number]}> = [];
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient, private cookieService: CookieService) {
     this.timeFrame = 'daily'; //daily or intraday
     this.selectedStock = 'aapl';
     this.interval = '5min';
@@ -88,6 +89,13 @@ export class AppComponent {
   }
   public ngOnInit(): void {
     this.callAPI();
+    const firstVisit = this.cookieService.get('firstVisit');
+    if (!firstVisit) {
+      this.cookieService.set('firstVisit', new Date().toUTCString(), { expires: 1095 });
+      console.log('newbie');
+    } else {
+      console.log('back again');
+    }
   }
 
   callAPI() {
@@ -111,7 +119,7 @@ export class AppComponent {
     }
     this.http.get<StockData>(url).subscribe((response) => {
       [this.array, this.indexArr] = this.jsonToArray(response);
-      console.log('this.array = '+this.array.length)
+      //console.log('this.array = '+this.array.length)
       for (let i = 0; i < this.array.length; i++) {
         this.arrayTuple.push({x:this.indexArr[i], y:this.array[i]});
       }
@@ -277,7 +285,7 @@ export class AppComponent {
     //----------------------------MINS---------------------------------------------------------------------------------------------------------
     let mins = sortedArray.slice(0).slice(0,40).sort((n1,n2) => n1.z - n2.z);
     for (let i = 0; i < 20; i++) {
-      console.log('mins[i]y = '+mins[i].y+', '+'mins[i]z = '+mins[i].z);
+      //console.log('mins[i]y = '+mins[i].y+', '+'mins[i]z = '+mins[i].z);
     }
     let minsRefined = [];
     for (let i = 0; i < mins.length; i++) {
@@ -368,9 +376,9 @@ export class AppComponent {
     let maxes = sortedArray.slice(0).reverse().slice(0,44);
     this.absoluteMax = maxes[0].y;
     maxes = maxes.sort((n1,n2) => n1.z - n2.z);
-    console.log('absolute max = '+ this.absoluteMax);
+    //console.log('absolute max = '+ this.absoluteMax);
     for (let i = 0; i < 20; i++) {
-      console.log('maxes[i]y = '+maxes[i].y+', '+'maxes[i]z = '+maxes[i].z);
+      //console.log('maxes[i]y = '+maxes[i].y+', '+'maxes[i]z = '+maxes[i].z);
     }
     let maxesRefined = [];
     for (let i = 0; i < maxes.length; i++) {
@@ -476,7 +484,7 @@ export class AppComponent {
     let peakArray: Array<{x:string, y:number, z:number}> = [];
     let peakAndValleyArray: Array<{x:string, y:number}> = [];
     let sliceSize = Math.ceil(this.array.length / resolution);
-    console.log('sliceSize = '+sliceSize)
+    //console.log('sliceSize = '+sliceSize)
     let pointer = 0;
     let count = 0;
     let sliceNumber = 0;
@@ -528,7 +536,7 @@ export class AppComponent {
       if (floatingDeviationValley[i].y > comparator) { comparator = floatingDeviationValley[i].y; indx = floatingDeviationValley[i].x; val = floatingDeviationValley[i].z, ind = floatingDeviationValley[i].zz, flag = 'valley'}
       if (floatingDeviationPeak[i].y > comparator) { comparator = floatingDeviationPeak[i].y; indx = floatingDeviationPeak[i].x; val = floatingDeviationPeak[i].z, ind = floatingDeviationPeak[i].zz, flag = 'peak'}
     }
-    console.log('itsAPArtyAy: '+ indx + ' ||| '+ val + '|||' + ind);
+    //console.log('itsAPArtyAy: '+ indx + ' ||| '+ val + '|||' + ind);
 
     // fill with peaks and valleys alternating based around max value and if it's a peak or valley and extrapolate out from the max val point (to the left and then to the right)
     let absoluteMaxPeak = 0;
@@ -537,8 +545,8 @@ export class AppComponent {
         absoluteMaxPeak = peakArray[i].y;
       }
     }
-    console.log('absoluteMaxPeak = '+absoluteMaxPeak);
-    console.log('ind = '+ ind);
+    //console.log('absoluteMaxPeak = '+absoluteMaxPeak);
+    //console.log('ind = '+ ind);
     if (ind > 1){
       let count = 0;
       let leftSide = [];
@@ -668,7 +676,7 @@ export class AppComponent {
       xPercent = Math.abs(peakAndValleyArray[i+1].y - peakAndValleyArray[i+2].y);
       let percent = xPercent / oneHundredPercent;
       if (Math.abs(percent - fib1) < .05) {
-        console.log('cool point found1' + ': ' + peakAndValleyArray[i].x +', '+ peakAndValleyArray[i+1].x +', '+peakAndValleyArray[i+2].x);
+        //console.log('cool point found1' + ': ' + peakAndValleyArray[i].x +', '+ peakAndValleyArray[i+1].x +', '+peakAndValleyArray[i+2].x);
         fibPoints1.push(peakAndValleyArray[i]);
         fibPoints1.push(peakAndValleyArray[i+1]);
         fibPoints1.push(peakAndValleyArray[i+2]);
@@ -677,7 +685,7 @@ export class AppComponent {
           isLatestTrend = true;
         }
       } else if (Math.abs(percent - fib2) < .05) {
-        console.log('cool point found2' + ': ' + peakAndValleyArray[i].x +', '+ peakAndValleyArray[i+1].x +', '+peakAndValleyArray[i+2].x);
+        //console.log('cool point found2' + ': ' + peakAndValleyArray[i].x +', '+ peakAndValleyArray[i+1].x +', '+peakAndValleyArray[i+2].x);
         fibPoints2.push(peakAndValleyArray[i]);
         fibPoints2.push(peakAndValleyArray[i+1]);
         fibPoints2.push(peakAndValleyArray[i+2]);
