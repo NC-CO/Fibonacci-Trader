@@ -12,8 +12,8 @@
   <h2>🧙🏻‍♂️ Stock Sorcerer</h2>
   <div class="chart-container">
     <app-polygon-api-controller class="left-bar" (selectedStockOutputter)="setStock($event)" (selectedTimeFrameOutputter)="setTimeFrame($event)" [patternScore]="score"></app-polygon-api-controller>
-    <mat-spinner style=" margin:0% auto;" color="accent" diameter="160"></mat-spinner>
-    <canvas id="MyChart">{{ chart }}</canvas>
+    <mat-spinner *ngIf="isLoading" style=" margin:0% auto;" color="accent" diameter="160"></mat-spinner>
+    <canvas id="MyChart" class="chart-itself">{{ chart }}</canvas>
   </div>
   <div class="mainBar">
     <div class="description">

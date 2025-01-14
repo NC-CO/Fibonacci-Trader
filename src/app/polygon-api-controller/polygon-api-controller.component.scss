@@ -38,3 +38,9 @@ h3 {
     background: red;
     height: 700px;
 }
+
+@media only screen and (max-width: 600px) {
+    h2, h3, p, .dropDownSeachBox .mat-form-field-outline .mat-form-field-outline-star {
+        font-size: 18px;
+    }
+}

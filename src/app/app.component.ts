@@ -52,6 +52,7 @@ interface StockData {
 
 export class AppComponent {
   public chart: any;
+  public isLoading = true;
   datepipe: DatePipe = new DatePipe('en-US');
   userName: string = 'user69';
   title = 'Fibonacci-Trader';
@@ -193,6 +194,7 @@ export class AppComponent {
   }
 
   public createChart(){
+    this.isLoading = true; // Set loading to true when chart creation starts
     this.chart = new Chart("MyChart", {
       type: 'line', //this denotes tha type of chart
       data: {// values on X-Axis
@@ -234,6 +236,7 @@ export class AppComponent {
         }
       }
     });
+    this.isLoading = false; // Set loading to false when chart creation ends
   }
 
 
