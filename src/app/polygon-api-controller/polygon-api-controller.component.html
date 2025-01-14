@@ -19,15 +19,20 @@
         <form [formGroup]="stockForm">
             <h2>Select Stock: </h2>
             <mat-form-field>
-                <mat-select formControlName="selectedStockControl" placeholder="Stock" class="mat-select-stuff" (ngModelChange)="changeStock($event)">
-                    <input matInput style="height:20%;font-size:large;width:90%;padding-left:7%;color:lightgrey;" type="text" (keydown)="onKey($any($event.target).value)">
-                    <mat-option class="mat-select-stuff" *ngFor="let stock of stocks" [value]="stock">{{this.stock.viewValue}}</mat-option>
-                </mat-select>
-            </mat-form-field>
+                <input matInput [matAutocomplete]="auto" (input)="onKey($any($event.target).value)"
+                       formControlName="selectedStockControl" (focus)="highlightText($event)" style="caret-color: yellow; line-height: 1.5;">
+                <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayStock" (optionSelected)="changeStock($event.option.value)" autoActiveFirstOption>
+                  <mat-option *ngFor="let stock of selectedStocks" [value]="stock">
+                    {{stock.viewValue}}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
             <h2>Select Timeframe: </h2>
             <mat-form-field>
-                <mat-select formControlName="selectedTimeFrameControl" placeholder="Time Frame" class="mat-select-stuff" (ngModelChange)="changeTimeFrame($event)">
-                    <mat-option class="mat-select-stuff" *ngFor="let TimeFrame of timeFrames" [value]="TimeFrame">{{this.TimeFrame.viewValue}}</mat-option>
+                <mat-select formControlName="selectedTimeFrameControl" placeholder="Time Frame" class="mat-select-stuff"
+                    (ngModelChange)="changeTimeFrame($event)">
+                    <mat-option class="mat-select-stuff" *ngFor="let TimeFrame of timeFrames"
+                        [value]="TimeFrame">{{TimeFrame.viewValue}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <div *ngIf="patternScore != 0">

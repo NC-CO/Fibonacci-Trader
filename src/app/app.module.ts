@@ -13,6 +13,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import {MatCardModule} from '@angular/material/card';
 import { CookieService } from 'ngx-cookie-service';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @NgModule({
   declarations: [
@@ -32,6 +34,8 @@ import { CookieService } from 'ngx-cookie-service';
     CommonModule,
     ReactiveFormsModule,
     MatCardModule,
+    MatFormFieldModule,
+    MatAutocompleteModule,
   ],
   providers: [
     CookieService,

@@ -621,11 +621,39 @@ export class PolygonApiControllerComponent implements OnInit {
     this.selectedStocks = this.search(value);
   }
 
-  search(value: string) { // Filter the stocks list and send back to populate the selectedStates**
+  search(value: string) {
+    console.log('value = ' + value);
+    const filter = value.toLowerCase();
+    return this.stocks
+      .filter(option => option.viewValue.toLowerCase().includes(filter) || option.value.toLowerCase().includes(filter))
+      .sort((a, b) => {
+        const aStartsWith = a.viewValue.toLowerCase().startsWith(filter) || a.value.toLowerCase().startsWith(filter);
+        const bStartsWith = b.viewValue.toLowerCase().startsWith(filter) || b.value.toLowerCase().startsWith(filter);
+        if (aStartsWith && !bStartsWith) {
+          return -1;
+        } else if (!aStartsWith && bStartsWith) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
+  }
+
+  displayStock(stock?: Stock): string {
+    return stock ? stock.viewValue : '';
+  }
+
+  highlightText(event: FocusEvent) {
+    const inputElement = event.target as HTMLInputElement;
+    inputElement.select();
+  }
+  
+
+  /*search(value: string) { // Filter the stocks list and send back to populate the selectedStates**
     console.log('value = '+ value)
     let filter = value.toLowerCase();
     return this.stocks.filter(option => option.viewValue.toLowerCase().includes(filter));
-  }
+  }*/
     
   changeStock(event: Event) {
     this.selectedStockOutputter.emit(this.stockForm.controls['selectedStockControl'].value);
