@@ -1,5 +1,7 @@
 # FibonacciTrader
 
+Automatically plots significant peaks and vallies in stock market graphs. Stock graphs are generated using a stock market API which pipes in live stock data. If a set of significant points resembles a harmonic pattern (bullish bat, bearish crab, etc.), it will be highlighted in yellow and a predicted rise or fall of the future stock price is illustrated with a dotted line. The user can select from any major stock on the left side bar and it will instantly populate the webpage.
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.7.
 
 ## Development server
