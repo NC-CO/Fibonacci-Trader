@@ -1,6 +1,6 @@
 .chart-container {
     width:100%;
-    height: 50%;
+    //height: 50%;
     display: flex;
     //padding-left: 10%;
     //padding-left: 25%;
@@ -9,9 +9,12 @@
 
 .chart-itself {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0% 0% 0% 8%;
+    align-items: left;
+    //justify-content: center;
+    margin: 0% 20vw 0% 5%;
+}
+.big-title{
+    overflow: hidden;
 }
 
 h2 {
@@ -19,8 +22,8 @@ h2 {
     display: flex;
     text-align: center;
     //padding-left: 45%;
-    padding-top: 3%;
-    padding-bottom: 4%;
+    padding-top: 3vh;
+    padding-bottom: 3vh;
     padding-left: 2%;
     font-size: 80px;
     font-family: "Arial", "Helvetica Neue", "Helvetica";
@@ -39,7 +42,7 @@ p {
 
 .wholePage {
     width: 100%;
-    height: 150%;
+    height: 150vh;
     top: 0;
     left: 0;
     margin: 0;
@@ -48,11 +51,12 @@ p {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    overflow-x: hidden;
 }
 
 @media only screen and (max-width: 600px) {
     .wholePage {
-        width: 100vw;
+        width: 100%;
         height: 200vh;
         background-size: cover;
         background-position: center;
@@ -73,7 +77,6 @@ p {
         align-items: center;
         justify-content: center;
         margin: 1% 2% 0% 0%;
-        height: 75vh;
     }
 
     h2 {
@@ -103,7 +106,7 @@ p {
 .left-bar {
     align-items: left;
     justify-content: left;
-    padding-right: 2%;
+    padding-right: 0%;
 }
 
 :host ::ng-deep .mat-progress-spinner circle, .mat-spinner circle {   

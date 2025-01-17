@@ -1,15 +1,6 @@
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->
-<!-- * * * * * * * * * * and can be replaced. * * * * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-<!-- * * * * * * * * * Delete the template below * * * * * * * * * * -->
-<!-- * * * * * * * to get started with your project! * * * * * * * * -->
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->
-
-
+<script src="anime.min.js"></script>
 <div class="wholePage">
-  <h2> 🧙🏻‍♂️ Stock Sorcerer</h2>
+  <h2 class="big-title"> 🧙🏻‍♂️ Stock Sorcerer</h2>
   <div class="chart-container">
     <app-polygon-api-controller class="left-bar" (selectedStockOutputter)="setStock($event)" (selectedTimeFrameOutputter)="setTimeFrame($event)" [patternScore]="score"></app-polygon-api-controller>
     <mat-spinner *ngIf="isLoading" style=" margin:0% auto;" color="accent" diameter="160"></mat-spinner>

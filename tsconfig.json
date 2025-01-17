@@ -25,11 +25,18 @@
       "dom",
       "ES2023.Array",
     ],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
   },
+  "typeRoots": [
+        "../node_modules/@types/"
+  ],
+  "noImplicitAny": false,
+  "include": ["**/*.ts", "test"],
   "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
+  "enableI18nLegacyMessageIdFormat": false,
+  "strictInjectionParameters": true,
+  "strictInputAccessModifiers": true,
+  "strictTemplates": true
   }
 }

@@ -15,6 +15,8 @@ import {MatCardModule} from '@angular/material/card';
 import { CookieService } from 'ngx-cookie-service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatIconModule } from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatCardModule,
     MatFormFieldModule,
     MatAutocompleteModule,
+    MatIconModule,
+    MatButtonModule,
   ],
   providers: [
     CookieService,

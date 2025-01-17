@@ -1,9 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, AfterViewInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import * as testData from '../assets/test.json';
 import Chart from 'chart.js/auto';
 import { DatePipe } from '@angular/common';
 import { CookieService } from 'ngx-cookie-service';
+import anime from 'animejs';
 
 interface Stock {
   value: string;
@@ -42,6 +43,24 @@ interface StockData {
         '5. volume': string;
     };
   };
+  'Weekly Time Series': {
+    [timestamp: string]:{
+        '1. open': string;
+        '2. high': string;
+        '3. low': string;
+        '4. close': string;
+        '5. volume': string;
+    };
+  };
+  'Monthly Time Series': {
+    [timestamp: string]:{
+        '1. open': string;
+        '2. high': string;
+        '3. low': string;
+        '4. close': string;
+        '5. volume': string;
+    };
+  };
 }
 
 @Component({
@@ -50,7 +69,43 @@ interface StockData {
   styleUrls: ['./app.component.scss'],
 })
 
-export class AppComponent {
+export class AppComponent implements AfterViewInit{
+
+  ngAfterViewInit(): void {
+    anime.timeline({loop: false})
+      .add({
+        targets: '.big-title',
+        translateY: ["1.1em", 0],
+        translateX: ["13.55em", 0],
+        translateZ: 0,
+        rotateZ: [40, 0],
+        duration: 2550,
+        //easing: "easeOutExpo",
+      });
+    /*anime.timeline({loop: false})
+    .add({
+      targets: '.big-title',
+      translateY: ["1.1em", 0],
+      translateX: ["10.55em", 0],
+      translateZ: 0,
+      rotateZ: [-180, 0],
+      duration: 1550,
+      //easing: "easeOutExpo",
+      delay: 2000
+    });*/
+
+    /*anime({
+      targets: '.big-title',
+      translateY: ["1.1em", 0],
+      translateX: ["10.55em", 0],
+      translateZ: 0,
+      rotateZ: [100, 0],
+      duration: 1500,
+      //easing: "easeInExpo",
+      //delay: (el: any, i: number) => 500 * i
+    });*/
+  }
+
   public chart: any;
   public isLoading = true;
   datepipe: DatePipe = new DatePipe('en-US');
@@ -115,10 +170,15 @@ export class AppComponent {
     let url  = '';
     if (this.timeFrame == 'daily') {
       url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${ this.selectedStock }&apikey=3Q62PTYW8KBTOCQ2`;
+    } else if (this.timeFrame == 'weekly') {
+      url = `https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${ this.selectedStock }&outputsize=compact&apikey=3Q62PTYW8KBTOCQ2`;
+    } else if (this.timeFrame == 'monthly') {
+      url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${ this.selectedStock }&outputsize=compact&apikey=3Q62PTYW8KBTOCQ2`;
     } else {
       url = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${ this.selectedStock }&interval=${ this.interval }&entitlement=delayed&outputsize=compact&apikey=3Q62PTYW8KBTOCQ2`;
     }
     this.http.get<StockData>(url).subscribe((response) => {
+      //!Giving reponse but doesn't want to be assigned!
       [this.array, this.indexArr] = this.jsonToArray(response);
       //console.log('this.array = '+this.array.length)
       for (let i = 0; i < this.array.length; i++) {
@@ -239,16 +299,25 @@ export class AppComponent {
     this.isLoading = false; // Set loading to false when chart creation ends
   }
 
-
+//!!! Update this to take weekly and monthly data!!! Account for 'Weekly Time Series' & 'Monthly Time Series'
   public jsonToArray(response: StockData): [Array<number>, Array<string>] {
     // build the index
     let index = [];
     let valArray: Array<number> = [];
     let indexArray: Array<string> = [];
-    for (let x in response['Time Series (5min)']) {
-      index.push(x);
-    }
-    if (index.length === 0) {
+    let selectedTimeframe = '';
+    //Find out what type of timeframe we're receiving and pull it's data
+    if (response['Time Series (5min)'] !== undefined) {
+      selectedTimeframe = 'intraday';
+      for (let x in response['Time Series (5min)']) {
+        index.push(x);
+      }
+      for (let i = index.length - 1; i >= 0; i--) {
+        valArray.push(Number(response['Time Series (5min)'][index[i]]['4. close']));
+        indexArray.push(index[i]);
+      }
+    } else if (response['Time Series (Daily)'] !== undefined) {
+      selectedTimeframe = 'daily';
       for (let x in response['Time Series (Daily)']) {
         index.push(x);
       }
@@ -256,9 +325,22 @@ export class AppComponent {
         valArray.push(Number(response['Time Series (Daily)'][index[i]]['4. close']));
         indexArray.push(index[i]);
       }
-    } else {
+    } else if (response['Weekly Time Series'] !== undefined) {
+      selectedTimeframe = 'weekly';
+      for (let x in response['Weekly Time Series']) {
+        index.push(x);
+      }
       for (let i = index.length - 1; i >= 0; i--) {
-        valArray.push(Number(response['Time Series (5min)'][index[i]]['4. close']));
+        valArray.push(Number(response['Weekly Time Series'][index[i]]['4. close']));
+        indexArray.push(index[i]);
+      }
+    } else if (response['Monthly Time Series'] !== undefined) {
+      selectedTimeframe = 'monthly';
+      for (let x in response['Monthly Time Series']) {
+        index.push(x);
+      }
+      for (let i = index.length - 1; i >= 0; i--) {
+        valArray.push(Number(response['Monthly Time Series'][index[i]]['4. close']));
         indexArray.push(index[i]);
       }
     }

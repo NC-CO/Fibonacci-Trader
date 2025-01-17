@@ -1,9 +1,10 @@
 .left-bar {
    // display:initial;
     align-items: left;
-    padding-top: 10%;
-    padding-left: 15px;
-    width: 170px;
+    padding-top: 1vh;
+    padding-left: 10%;
+    width: 80%;
+    //width: 170px;
 }
 
 .mat-select-stuff{
@@ -21,6 +22,7 @@ h1 {
 h2 {
     color: black;
     text-align: left;
+    padding-top: 5%;
 }
 
 h3 {
@@ -43,4 +45,19 @@ h3 {
     h2, h3, p, .dropDownSeachBox .mat-form-field-outline .mat-form-field-outline-star {
         font-size: 18px;
     }
+    .left-bar {
+        padding-top: 5%;
+        padding-left: 2%;
+    }
+
+}
+
+.example-button-container {
+    display: flex;
+    justify-content: center;
+    width: 140px;
+}
+
+.mat-form-field{
+    font-size: 10px;
 }

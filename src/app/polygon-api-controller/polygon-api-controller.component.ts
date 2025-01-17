@@ -41,6 +41,8 @@ export class PolygonApiControllerComponent implements OnInit {
   timeFrames: TimeFrame[] = [
     {value: 'daily', viewValue: 'Day'},
     {value: 'intraday', viewValue: 'Intraday'},
+    {value: 'weekly', viewValue: 'Week'},
+    {value: 'monthly', viewValue: 'Month'},
   ];
 
   stocks: Stock[] = [
