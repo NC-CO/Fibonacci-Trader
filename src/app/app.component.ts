@@ -79,31 +79,35 @@ export class AppComponent implements AfterViewInit{
         translateX: ["13.55em", 0],
         translateZ: 0,
         rotateZ: [40, 0],
-        duration: 2550,
+        duration: 2650,
+        //easing: "easeOutExpo",
+      }).add({
+        targets: '.big-title',
+        duration: 2000,
+        translateY: [0, "-0.4em"],
+        skewX: -7,
+        skewY: -3.5,
+        delay: 160, 
+        //easing: "easeOutExpo",
+      }).add({
+        targets: '.big-title',
+        duration: 2065,
+        translateY: ["-0.4em", 0],
+        skewX: 0,
+        skewY: 0,
+       // delay: 2700, 
         //easing: "easeOutExpo",
       });
-    /*anime.timeline({loop: false})
+    anime.timeline({loop: false})
     .add({
-      targets: '.big-title',
-      translateY: ["1.1em", 0],
-      translateX: ["10.55em", 0],
-      translateZ: 0,
-      rotateZ: [-180, 0],
-      duration: 1550,
-      //easing: "easeOutExpo",
-      delay: 2000
-    });*/
-
-    /*anime({
-      targets: '.big-title',
-      translateY: ["1.1em", 0],
-      translateX: ["10.55em", 0],
-      translateZ: 0,
-      rotateZ: [100, 0],
-      duration: 1500,
+      targets: '.left-bar',
+      translateY: ["10.1em", 0],
+      translateX: ["-20.55em", 0],
+      rotateZ: [20, 0],
+      duration: 1050,
       //easing: "easeInExpo",
-      //delay: (el: any, i: number) => 500 * i
-    });*/
+      delay: 0
+    });
   }
 
   public chart: any;
