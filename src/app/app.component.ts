@@ -372,12 +372,11 @@ export class AppComponent implements AfterViewInit{
     }
     let sortedArray = all.slice(0).sort((n1,n2) => n1.y - n2.y);
     //----------------------------MINS---------------------------------------------------------------------------------------------------------
+    //grabs lowest 40 points then sorts them based on time ascending
     let mins = sortedArray.slice(0).slice(0,40).sort((n1,n2) => n1.z - n2.z);
-    for (let i = 0; i < 20; i++) {
-      //console.log('mins[i]y = '+mins[i].y+', '+'mins[i]z = '+mins[i].z);
-    }
     let minsRefined = [];
     for (let i = 0; i < mins.length; i++) {
+      //find smallest mins relative to neighbor mins
       if (i === 0) {
         if ((mins[0].y < mins[1].y) && (mins[0].y < mins[2].y) && (mins[0].y < mins[3].y)  && (mins[0].y < mins[4].y)) {
           minsRefined.push(mins[0]);
@@ -464,8 +463,8 @@ export class AppComponent implements AfterViewInit{
     //---------------------------MAXES-----------------------------------------------------------------------------------------------------
     let maxes = sortedArray.slice(0).reverse().slice(0,44);
     this.absoluteMax = maxes[0].y;
+    //arrange maxes in time order
     maxes = maxes.sort((n1,n2) => n1.z - n2.z);
-    //console.log('absolute max = '+ this.absoluteMax);
     for (let i = 0; i < 20; i++) {
       //console.log('maxes[i]y = '+maxes[i].y+', '+'maxes[i]z = '+maxes[i].z);
     }
