@@ -84,7 +84,7 @@ export class AppComponent implements AfterViewInit{
       }).add({
         targets: '.big-title',
         duration: 2050,
-        translateY: [0, "-0.4em"],
+        translateY: [0, "-0.5em"],
         skewX: -7,
         skewY: -3.5,
         delay: 650, 
@@ -92,7 +92,7 @@ export class AppComponent implements AfterViewInit{
       }).add({
         targets: '.big-title',
         duration: 2460,
-        translateY: ["-0.4em", 0],
+        translateY: ["-0.5em", 0],
         skewX: 0,
         skewY: 0,
        // delay: 2700, 
@@ -104,7 +104,7 @@ export class AppComponent implements AfterViewInit{
       translateY: ["10.1em", 0],
       translateX: ["-20.55em", 0],
       rotateZ: [20, 0],
-      duration: 1050,
+      duration: 1580,
       //easing: "easeInExpo",
       delay: 0
     });
