@@ -43,7 +43,7 @@
                 <mat-select formControlName="selectedTimeFrameControl" placeholder="Time Frame" class="mat-select-stuff"
                     (ngModelChange)="changeTimeFrame($event)">
                     <mat-option class="mat-select-stuff" *ngFor="let TimeFrame of timeFrames"
-                        [value]="TimeFrame">{{TimeFrame.viewValue}}</mat-option>
+                        [value]="TimeFrame" [disabled]="true">{{TimeFrame.viewValue}}</mat-option>
                 </mat-select>
             </mat-form-field>
             <div *ngIf="patternScore != 0" class="pattern-score">
