@@ -6,6 +6,9 @@ import { DatePipe } from '@angular/common';
 import { CookieService } from 'ngx-cookie-service';
 import anime from 'animejs';
 
+//Make website called StockSorcerer.com and make a funny YouTube ad where you're wearing a wizard hat and beard 
+//in the woods doing CGI magic and talking about the site
+
 interface Stock {
   value: string;
   viewValue: string;
