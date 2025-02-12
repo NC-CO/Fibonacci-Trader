@@ -367,379 +367,364 @@ export class AppComponent implements AfterViewInit{
   public peakAndValleyFinder(): Array<{x:string, y:number}> {
     let peakAndValleyArray: Array<{x:string, y:number}> = [];
     let all = [];
+    let graphTotal = 0;
     for (let i = 0; i < this.array.length; i++) {
       all.push({x:this.indexArr[i], y:this.array[i], z:i});
+      graphTotal += this.array[i];
     }
-    let sortedArray = all.slice(0).sort((n1,n2) => n1.y - n2.y);
-    //----------------------------MINS---------------------------------------------------------------------------------------------------------
-    //grabs lowest 40 points then sorts them based on time ascending
-    let mins = sortedArray.slice(0).slice(0,40).sort((n1,n2) => n1.z - n2.z);
-    let minsRefined = [];
-    for (let i = 0; i < mins.length; i++) {
-      //find smallest mins relative to neighbor mins
-      if (i === 0) {
-        if ((mins[0].y < mins[1].y) && (mins[0].y < mins[2].y) && (mins[0].y < mins[3].y)  && (mins[0].y < mins[4].y)) {
-          minsRefined.push(mins[0]);
+
+    let graphAvg = graphTotal / this.array.length;
+
+    let subsectionCount = 10;
+    let subsectionArray = [];
+    let subsectionSize = Math.ceil(all.length / subsectionCount);
+
+    for (let i = 0; i < subsectionCount; i++) {
+      let start = i * subsectionSize;
+      let end = start + subsectionSize;
+      let subsection = all.slice(start, end);
+      subsectionArray.push(subsection);
+      console.log('subsection seam = '+subsection[subsection.length - 1].x);
+    }
+    
+    let subsectionSeams = [];
+    for (let i = 0; i < subsectionArray.length; i++) {
+      subsectionSeams.push(subsectionArray[i][subsectionArray[i].length - 1].z);
+    }
+
+    console.log('subsection size: '+subsectionSize);
+    // Loop to console.log every element of subsectionArray
+    for (let i = 0; i < subsectionArray.length; i++) {
+      for (let j = 0; j < subsectionArray[i].length; j++) {
+        //console.log('subsection ' + i + ': '+subsectionArray[i][j].x + ', ' + subsectionArray[i][j].y + ', ' + subsectionArray[i][j].z);
+      }
+    }
+
+    let subsectionArrayMinsMaxesOnly = [];
+    for (let i = 0; i < subsectionArray.length; i++) {
+      let subsection = subsectionArray[i];
+      if (subsection.length > 0) {
+        let minY = subsection[0].y;
+        let maxY = subsection[0].y;
+        let minX = subsection[0].x;
+        let maxX = subsection[0].x;
+        let minZ = subsection[0].z;
+        let maxZ = subsection[0].z;
+        for (let j = 1; j < subsection.length; j++) {
+          if (subsection[j].y < minY) {
+            minY = subsection[j].y;
+            minX = subsection[j].x;
+            minZ = subsection[j].z;
+          }
+          if (subsection[j].y > maxY) {
+            maxY = subsection[j].y;
+            maxX = subsection[j].x;
+            maxZ = subsection[j].z;
+          }
+        }
+        subsectionArrayMinsMaxesOnly.push({minX, minY, minZ, maxX, maxY, maxZ});
+      }
+    }
+
+    //remove any min/max pairs that are directly next to eachother
+    for (let i = 0; i < subsectionArrayMinsMaxesOnly.length - 1; i++) {
+      //if maxes are directly next to eachother, only plot larger one
+      if (subsectionArrayMinsMaxesOnly[i].minZ === subsectionArrayMinsMaxesOnly[i + 1].minZ - 1) {
+        if (subsectionArrayMinsMaxesOnly[i].minY < subsectionArrayMinsMaxesOnly[i + 1].minY) {
+          subsectionArrayMinsMaxesOnly[i + 1].minX = '0';
+        } else {
+          subsectionArrayMinsMaxesOnly[i].minX = '0';
         }
       }
-      if (i > 0) {
-        if (i === mins.length-1) {
-          if (mins[i].y < minsRefined[minsRefined.length-1].y || Math.abs(mins[i].z - minsRefined[minsRefined.length-1].z) > 4) {
-            minsRefined.push(mins[i]);
+      //if mins are directly next to eachother, only plot smaller one
+      if (subsectionArrayMinsMaxesOnly[i].maxZ === subsectionArrayMinsMaxesOnly[i + 1].maxZ - 1) {
+        if (subsectionArrayMinsMaxesOnly[i].maxY > subsectionArrayMinsMaxesOnly[i + 1].maxY) {
+          subsectionArrayMinsMaxesOnly[i + 1].maxX = '0';
+        } else {
+          subsectionArrayMinsMaxesOnly[i].maxX = '0';
+        }
+      }
+      // if a min is directly followed by a max, set both to zero, this is a mid-slope seam error
+      if (subsectionArrayMinsMaxesOnly[i].minZ === (subsectionArrayMinsMaxesOnly[i + 1].maxZ - 1)) {
+          subsectionArrayMinsMaxesOnly[i].minX = '0';
+          subsectionArrayMinsMaxesOnly[i+1].maxX = '0';
+      }
+      // if a max is directly followed by a min, set both to zero, this is a mid-slope seam error
+      if (subsectionArrayMinsMaxesOnly[i].maxZ === (subsectionArrayMinsMaxesOnly[i + 1].minZ - 1)) {
+          subsectionArrayMinsMaxesOnly[i].maxX = '0';
+          subsectionArrayMinsMaxesOnly[i+1].minX = '0';
+      }
+      //if a min is on a seam (last point of subsection), check if first point of next subsection is less
+      if (subsectionArrayMinsMaxesOnly[i].minX !== '0') {
+        if (subsectionArrayMinsMaxesOnly[i].minZ === subsectionSeams[i]) {
+          if (subsectionArrayMinsMaxesOnly[i].minY > subsectionArray[i + 1][0].y) {
+            subsectionArrayMinsMaxesOnly[i].minX = '0';
           }
-        } else if (i === mins.length-2) {
-          if ((mins[i].y < mins[i-1].y && mins[i].y < mins[i-2].y) && (mins[i].y < mins[i+1].y)) {
-            minsRefined.push(mins[i]);
-          } else if (Math.abs(mins[i].z - mins[i-1].z) > 30 || Math.abs(mins[i].z - mins[i+1].z) > 30) {
-            minsRefined.push(mins[i]);
+        }
+      }
+      //if a max is on a seam (last point of subsection), check if first point of next subsection is greater
+      if (subsectionArrayMinsMaxesOnly[i].maxX !== '0') {
+        if (subsectionArrayMinsMaxesOnly[i].maxZ === subsectionSeams[i]) {
+          if (subsectionArrayMinsMaxesOnly[i].maxY < subsectionArray[i + 1][0].y) {
+            subsectionArrayMinsMaxesOnly[i].maxX = '0';
           }
-        } else if (i === 1) {
-          if (mins[1].y < mins[0].y && mins[1].y < mins[2].y && mins[1].y < mins[3].y) {
-            minsRefined.push(mins[1]);
-          }
-        } else if (i > 1 && i <= mins.length-3) { 
-          if (minsRefined.length === 0){
-            if (i === 2 && (mins[i].y < mins[i-1].y) && (mins[i].y < mins[i+1].y && mins[i].y < mins[i+2].y)) {
-              minsRefined.push(mins[i]);
-            } else if ((mins[i].y < mins[i-1].y && mins[i].y < mins[i-2].y) && (mins[i].y <= mins[i+1].y && mins[i].y < mins[i+2].y)) {
-              minsRefined.push(mins[i]);
-            } else {
-              if (Math.abs(mins[i].z - mins[i-1].z) > 3 && mins[i].y < mins[i+1].y) { //if far from last point, only compare to forward
-                minsRefined.push(mins[i]);
-              } else if (Math.abs(mins[i].z - mins[i-1].z) > 25 || Math.abs(mins[i].z - mins[i+1].z) > 28) {
-                minsRefined.push(mins[i]);
-              }
-            }
-          } else {
-            if (i === 2 && (mins[i].y < mins[i-1].y) && (mins[i].y < mins[i+1].y && mins[i].y < mins[i+2].y)) {
-              minsRefined.push(mins[i]); 
-            } else if ((mins[i].y < mins[i-1].y && mins[i].y < mins[i-2].y) && (mins[i].y <= mins[i+1].y)) {
-              minsRefined.push(mins[i]);
-            } else {
-              if (Math.abs(mins[i].z - mins[i-1].z) > 3 && mins[i].y < mins[i+1].y && mins[i].y < mins[i+2].y) { //if far from last point, only compare to forward
-                minsRefined.push(mins[i]);
-              } else if (Math.abs(mins[i].z - mins[i-1].z) > 25 || Math.abs(mins[i].z - mins[i+1].z) > 28) {
-                minsRefined.push(mins[i]);
-              }
-            }
-          }
+        }
+      }
+    }
+    //make subsectionArraySortedByZ into 1d list, don't add x = 0 values. 
+    //this escapes the current pairs format that has limitations and removes 0s thus far
+    let subsectionArraySortedByZ = [];
+    for (let i = 0; i < subsectionArrayMinsMaxesOnly.length; i++) {
+      if (subsectionArrayMinsMaxesOnly[i].minZ > subsectionArrayMinsMaxesOnly[i].maxZ) {
+        if (subsectionArrayMinsMaxesOnly[i].maxX !== '0') {
+          subsectionArraySortedByZ.push({ x: subsectionArrayMinsMaxesOnly[i].maxX, y: subsectionArrayMinsMaxesOnly[i].maxY, z: subsectionArrayMinsMaxesOnly[i].maxZ, pairOrder: '1st of 2'});
+        }
+        if (subsectionArrayMinsMaxesOnly[i].minX !== '0') {
+          subsectionArraySortedByZ.push({ x: subsectionArrayMinsMaxesOnly[i].minX, y: subsectionArrayMinsMaxesOnly[i].minY, z: subsectionArrayMinsMaxesOnly[i].minZ, pairOrder: '2nd of 2'});
+        }
+      } else {
+        if (subsectionArrayMinsMaxesOnly[i].minX !== '0') {
+          subsectionArraySortedByZ.push({ x: subsectionArrayMinsMaxesOnly[i].minX, y: subsectionArrayMinsMaxesOnly[i].minY, z: subsectionArrayMinsMaxesOnly[i].minZ, pairOrder: '2nd of 2'});
         } 
+        if (subsectionArrayMinsMaxesOnly[i].maxX !== '0') {
+          subsectionArraySortedByZ.push({ x: subsectionArrayMinsMaxesOnly[i].maxX, y: subsectionArrayMinsMaxesOnly[i].maxY, z: subsectionArrayMinsMaxesOnly[i].maxZ, pairOrder: '1st of 2'});
+        }
       }
     }
 
-    // Find ignored valleys that are of middle value (Put inside of 304 as a nested if, and then the rest is under else)
-    /*for (let i = 6; i < all.length - 7; i++) {
-      if (all[i].y < all[i-1].y && all[i].y < all[i-2].y && all[i].y < all[i-3].y && all[i].y < all[i-4].y && all[i].y < all[i-5].y
-        && all[i].y < all[i-6].y && all[i].y < all[i+1].y && all[i].y < all[i+2].y && all[i].y < all[i+3].y && all[i].y < all[i+4].y
-        && all[i].y < all[i+5].y && all[i].y < all[i+6].y) {
-          minsRefined.push(all[i]);
+    //1.) fix yellow line plotter (out of order sometimes and sometimes the dotted line at the end is steep! )
+    let absoluteMax = 0;
+    let absoluteMin = all[0].y;
+    for (let i = 0; i < all.length; i++) {
+      if (all[i].y > absoluteMax) {
+        absoluteMax = all[i].y;
       }
-    }*/
-
-    let minsFinal = [];
-    for (let i = 0; i < minsRefined.length; i++) {
-      if (i === 0) {
-        if ((minsRefined[0].y < minsRefined[1].y || (Math.abs(minsRefined[0].z - minsRefined[1].z) > 4))) {
-          minsFinal.push(minsRefined[0]);
-        }
-      }
-      if (i > 0) {
-        if (i === minsRefined.length-1) {
-          if (minsRefined[i].y < minsFinal[minsFinal.length-1].y || Math.abs(minsRefined[i].z - minsFinal[minsFinal.length-1].z) > 6) {
-            minsFinal.push(minsRefined[i]);
-          }
-        } else if (i === 1) {
-          if ((minsRefined[1].y < minsRefined[0].y || (Math.abs(minsRefined[1].z - minsRefined[0].z) > 6)) && (minsRefined[1].y < minsRefined[2].y || (Math.abs(minsRefined[1].z - minsRefined[2].z) > 6))) {
-            minsFinal.push(minsRefined[1]);
-          }
-        } else if (i > 1 && i <= minsRefined.length-2) { 
-          if (((minsRefined[i].y < minsRefined[i-1].y) || Math.abs(minsRefined[i].z - minsRefined[i-1].z) > 6) && (minsRefined[i].y <= minsRefined[i+1].y || (Math.abs(minsRefined[i].z - minsRefined[i+1].z) > 6))) {
-            minsFinal.push(minsRefined[i]);
-          }
-        }
+      if (all[i].y < absoluteMin) {
+        absoluteMin = all[i].y;
       }
     }
     
-    //---------------------------MAXES-----------------------------------------------------------------------------------------------------
-    let maxes = sortedArray.slice(0).reverse().slice(0,44);
-    this.absoluteMax = maxes[0].y;
-    //arrange maxes in time order
-    maxes = maxes.sort((n1,n2) => n1.z - n2.z);
-    for (let i = 0; i < 20; i++) {
-      //console.log('maxes[i]y = '+maxes[i].y+', '+'maxes[i]z = '+maxes[i].z);
-    }
-    let maxesRefined = [];
-    for (let i = 0; i < maxes.length; i++) {
-      if (i === 0) {
-        if ((maxes[0].y > maxes[1].y) && (maxes[0].y > maxes[2].y) && (maxes[0].y > maxes[3].y)  && (maxes[0].y > maxes[4].y)) {
-          maxesRefined.push(maxes[0]);
-        }
-      }
-      if (i > 0) {
-        if (i === maxes.length-1) {
-          if (maxes[i].y > maxesRefined[maxesRefined.length-1].y || Math.abs(maxes[i].z - maxesRefined[maxesRefined.length-1].z) > 4) {
-            maxesRefined.push(maxes[i]);
+    let range = absoluteMax - absoluteMin;
+    for (let i = 0; i < subsectionArraySortedByZ.length - 1; i++) {
+      let byeByeNeighborDistance = 2;
+      if (Math.abs(subsectionArraySortedByZ[i+1].z - subsectionArraySortedByZ[i].z) <= byeByeNeighborDistance) {
+        //beginning edge case
+        if (subsectionArraySortedByZ[i].z < byeByeNeighborDistance) {
+          if (range / Math.abs(subsectionArraySortedByZ[i+1].y - subsectionArraySortedByZ[i].y) > 0.15) {
+            break;
           }
-        } else if (i === maxes.length-2) {
-          if ((maxes[i].y > maxes[i-1].y && maxes[i].y > maxes[i-2].y) && (maxes[i].y >= maxes[i+1].y)) {
-            maxesRefined.push(maxes[i]);
-          } else if (Math.abs(maxes[i].z - maxes[i-1].z) > 30 || Math.abs(maxes[i].z - maxes[i+1].z) > 30) {
-            maxesRefined.push(maxes[i]);
-          }
-        } else if (i === 1) {
-          if (maxes[1].y > maxes[0].y && maxes[1].y > maxes[2].y && maxes[1].y > maxes[3].y) {
-            maxesRefined.push(maxes[1]);
-          }
-        } else if (i > 1 && i <= maxes.length-3) { 
-          if (maxesRefined.length === 0){
-            if (i === 2 && (maxes[i].y > maxes[i-1].y) && (maxes[i].y > maxes[i+1].y && maxes[i].y > maxes[i+2].y)) {
-              maxesRefined.push(maxes[i]);
-            } else if ((maxes[i].y > maxes[i-1].y && maxes[i].y > maxes[i-2].y) && (maxes[i].y >= maxes[i+1].y && maxes[i].y > maxes[i+2].y)) {
-              maxesRefined.push(maxes[i]);
-            } else {
-              if (Math.abs(maxes[i].z - maxes[i-1].z) > 3 && maxes[i].y > maxes[i+1].y) { //if far from last point, only compare to forward
-                maxesRefined.push(maxes[i]);
-              } else if (Math.abs(maxes[i].z - maxes[i-1].z) > 25 || Math.abs(maxes[i].z - maxes[i+1].z) > 28) {
-                maxesRefined.push(maxes[i]);
+          if (subsectionArraySortedByZ[i].z === 0) {
+            let localAvg = (all[0].y + all[1].y + all[2].y + all[3].y + all[4].y)/5;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
               }
-            }
-          } else {
-            if (i === 2 && (maxes[i].y > maxes[i-1].y) && (maxes[i].y > maxes[i+1].y && maxes[i].y > maxes[i+2].y)) {
-              maxesRefined.push(maxes[i]);
-            } else if ((maxes[i].y > maxes[i-1].y && maxes[i].y > maxes[i-2].y) && (maxes[i].y >= maxes[i+1].y)) {
-              maxesRefined.push(maxes[i]);
             } else {
-              if (Math.abs(maxes[i].z - maxes[i-1].z) > 3 && maxes[i].y > maxes[i+1].y && maxes[i].y > maxes[i+2].y) { //if far from last point, only compare to forward
-                maxesRefined.push(maxes[i]);
-              } else if (Math.abs(maxes[i].z - maxes[i-1].z) > 25 || Math.abs(maxes[i].z - maxes[i+1].z) > 28) {
-                maxesRefined.push(maxes[i]);
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
               }
             }
           }
-        } 
-      }
-    }
-
-    // Find ignored peaks that are of middle value
-    /*for (let i = 6; i < all.length - 7; i++) {
-      if (all[i].y > all[i-1].y && all[i].y > all[i-2].y && all[i].y > all[i-3].y && all[i].y > all[i-4].y && all[i].y > all[i-5].y
-        && all[i].y > all[i-6].y && all[i].y > all[i+1].y && all[i].y > all[i+2].y && all[i].y > all[i+3].y && all[i].y > all[i+4].y
-        && all[i].y > all[i+5].y && all[i].y > all[i+6].y) {
-          maxesRefined.push(all[i]);
-      }
-    }
-    maxesRefined.sort((n1,n2) => n1.z - n2.z);*/
-
-    let maxesFinal = [];
-    for (let i = 0; i < maxesRefined.length; i++) {
-      if (i === 0) {
-        if ((maxesRefined[0].y > maxesRefined[1].y || (Math.abs(maxesRefined[0].z - maxesRefined[1].z) > 4))) {
-          maxesFinal.push(maxesRefined[0]);
-        }
-      }
-      if (i > 0) {
-        if (i === maxesRefined.length-1) {
-          if (maxesRefined[i].y > maxesFinal[maxesFinal.length-1].y || Math.abs(maxesRefined[i].z - maxesFinal[maxesFinal.length-1].z) > 6) {
-            maxesFinal.push(maxesRefined[i]);
-          }
-        } else if (i === 1) {
-          if ((maxesRefined[1].y > maxesRefined[0].y || (Math.abs(maxesRefined[1].z - maxesRefined[0].z) > 6)) && (maxesRefined[1].y > maxesRefined[2].y || (Math.abs(maxesRefined[1].z - maxesRefined[2].z) > 6))) {
-            maxesFinal.push(maxesRefined[1]);
-          }
-        } else if (i > 1 && i <= maxesRefined.length-2) { 
-          if (((maxesRefined[i].y > maxesRefined[i-1].y) || Math.abs(maxesRefined[i].z - maxesRefined[i-1].z) > 6) && (maxesRefined[i].y > maxesRefined[i+1].y || (Math.abs(maxesRefined[i].z - maxesRefined[i+1].z) > 6))) {
-            maxesFinal.push(maxesRefined[i]);
-          }
-        }
-      }
-    }
-
-    let extremes = minsFinal.concat(maxesFinal);
-    extremes = extremes.sort((n1,n2) => n1.z - n2.z);
-
-    for (let i = 0; i < extremes.length; i++) {
-      peakAndValleyArray.push({x:extremes[i].x, y:extremes[i].y});
-    }
-    
-
-    return peakAndValleyArray;
-  }
-
-  public altPeakAndValleyFinder(resolution = 8): Array<{x:string, y:number}> {
-
-    // segregate the list into 8ths. Find mins/maxes of each 8th
-    let valleyArray: Array<{x:string, y:number, z:number}> = [];
-    let peakArray: Array<{x:string, y:number, z:number}> = [];
-    let peakAndValleyArray: Array<{x:string, y:number}> = [];
-    let sliceSize = Math.ceil(this.array.length / resolution);
-    //console.log('sliceSize = '+sliceSize)
-    let pointer = 0;
-    let count = 0;
-    let sliceNumber = 0;
-
-    for (let i = 0; i < resolution; i++){
-      let floatingMin = 999999;
-      let floatingMax = 0;
-      let minIndx = '';
-      let maxIndx = '';
-      
-      for (let j = pointer; j < pointer + sliceSize; j++) {
-        if (pointer < this.array.length - 1) {
-          if (this.array[j] < floatingMin) { floatingMin = this.array[j]; minIndx = this.indexArr[j]; sliceNumber = count;}
-          if (this.array[j] > floatingMax) { floatingMax = this.array[j]; maxIndx = this.indexArr[j]; sliceNumber = count;}
-          //console.log('pointer = '+ pointer);
-          //TODO: fix first point the way you fixed the last point
-        }
-      }
-      count += 1;
-      valleyArray.push({x:minIndx, y:floatingMin, z:sliceNumber});
-      peakArray.push({x:maxIndx, y:floatingMax, z:sliceNumber});
-      pointer += sliceSize;
-      //console.log('pointer  = ' + pointer);
-      // !! Pointer is 3 short at end (96 and not 99) (now 104)
-    }
-
-    let median = 0;
-    let sortedArray = this.array.slice(0).sort();
-    if (sortedArray.length % 2 == 0){
-      median = (sortedArray[Math.ceil((sortedArray.length - 1) / 2)] + sortedArray[Math.floor((sortedArray.length - 1) / 2)]) / 2;
-    } else {
-      median = sortedArray[sortedArray.length - 1 / 2];
-    }
-
-    let floatingDeviationValley = [];
-    let floatingDeviationPeak = [];
-    for (let i = 0; i < resolution; i++) {
-      floatingDeviationValley.push({x:valleyArray[i].x, y:Math.abs(median - valleyArray[i].y), z:valleyArray[i].y, zz:valleyArray[i].z});
-      floatingDeviationPeak.push({x:peakArray[i].x, y:Math.abs(median - peakArray[i].y), z:peakArray[i].y, zz:peakArray[i].z});   
-    }
-
-    // find starting point (largest deviation point in whole graph)
-    let comparator = 0;
-    let indx = '';
-    let val = 0;
-    let ind = 0;
-    let flag = '';
-    for (let i = 0; i < resolution; i++) {
-      if (floatingDeviationValley[i].y > comparator) { comparator = floatingDeviationValley[i].y; indx = floatingDeviationValley[i].x; val = floatingDeviationValley[i].z, ind = floatingDeviationValley[i].zz, flag = 'valley'}
-      if (floatingDeviationPeak[i].y > comparator) { comparator = floatingDeviationPeak[i].y; indx = floatingDeviationPeak[i].x; val = floatingDeviationPeak[i].z, ind = floatingDeviationPeak[i].zz, flag = 'peak'}
-    }
-    //console.log('itsAPArtyAy: '+ indx + ' ||| '+ val + '|||' + ind);
-
-    // fill with peaks and valleys alternating based around max value and if it's a peak or valley and extrapolate out from the max val point (to the left and then to the right)
-    let absoluteMaxPeak = 0;
-    for (let i = 0; i < peakArray.length; i++) {
-      if (peakArray[i].y > absoluteMaxPeak) {
-        absoluteMaxPeak = peakArray[i].y;
-      }
-    }
-    //console.log('absoluteMaxPeak = '+absoluteMaxPeak);
-    //console.log('ind = '+ ind);
-    if (ind > 1){
-      let count = 0;
-      let leftSide = [];
-      let rightSide = [];
-      if (flag === 'valley'){
-        for (let i = ind - 1; i >= 0; i--) {     
-          if (i === 0) {
-            if (peakArray[0].y > peakArray[1].y) {
-              leftSide.push({x:peakArray[i].x ,y:peakArray[i].y });
-            }
-            // !! make less hardcoded. I LEFT OFF HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**************************************************************************
-          } else {
-            if (count % 2 === 0){
-              leftSide.push({x:peakArray[i].x ,y:peakArray[i].y });
+          else if (subsectionArraySortedByZ[i].z === 1) {
+            let localAvg = (all[0].y + all[1].y + all[2].y + all[3].y + all[4].y)/5;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
             } else {
-              leftSide.push({x:valleyArray[i].x ,y:valleyArray[i].y });
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
             }
-          }
-          count++;
-        }
-        leftSide.reverse();
-        leftSide.push({x:indx, y:val});
-        count = 0;
-        for (let i = ind + 1; i < resolution; i++) {  
-          if (count % 2 === 0){
-            rightSide.push({x:peakArray[i].x ,y:peakArray[i].y });
-          } else if (count !== resolution - 1){
-            rightSide.push({x:valleyArray[i].x ,y:valleyArray[i].y });  
-          } else {
-            if (peakArray[i].y === absoluteMaxPeak) {
-              rightSide.push({x:peakArray[i].x ,y:peakArray[i].y });
-            }
-          }
-          count++;
-        }
-        peakAndValleyArray = leftSide.concat(rightSide);
-      } else {
-        for (let i = ind - 1; i >= 0; i--) {     
-          if (i === 0) {
-            if (valleyArray[0].y > valleyArray[1].y) {
-              leftSide.push({x:valleyArray[i].x ,y:valleyArray[i].y });
-            }
-            // !! make less hardcoded. I LEFT OFF HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!**************************************************************************
-          } else {
-            if (count % 2 === 0){
-              leftSide.push({x:valleyArray[i].x ,y:valleyArray[i].y });
+          } else if (subsectionArraySortedByZ[i].z === 2) {
+            let localAvg = (all[0].y + all[1].y + all[2].y + all[3].y + all[4].y + all[5].y)/6;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
             } else {
-              leftSide.push({x:peakArray[i].x ,y:peakArray[i].y });
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
             }
+          } else if (subsectionArraySortedByZ[i].z === 3) {
+            let localAvg = (all[0].y + all[1].y + all[2].y + all[3].y + all[4].y + all[5].y + all[6].y)/7;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            } else {
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            }
+          } else if (subsectionArraySortedByZ[i].z === 4) {
+            let localAvg = (all[0].y + all[1].y + all[2].y + all[3].y + all[4].y + all[5].y + all[6].y + all[7].y)/8;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            } else {
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i+1].y) {
+                subsectionArraySortedByZ.splice(i+1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            }
+          } //middle section
+        } else if (subsectionArraySortedByZ[i].z > byeByeNeighborDistance && subsectionArraySortedByZ[i].z < (all.length - byeByeNeighborDistance)) {
+//!!start here (Microsoft stock) save point 2 points away from being cut by doing a Break; if y is 
+// large proportionally to overall max minus overall min. make this check a dynamic distance away 
+// based on byByeNeighborDistance
+          if (range / Math.abs(subsectionArraySortedByZ[i+1].y - subsectionArraySortedByZ[i].y) > 0.15) {
+            break;
           }
-          count++;
-        }
-        leftSide.reverse();
-        leftSide.push({x:indx, y:val});
-        count = 0;
-        for (let i = ind + 1; i < resolution; i++) {  
-          if (count % 2 === 0){
-            rightSide.push({x:valleyArray[i].x ,y:valleyArray[i].y });
-          } else if (count !== resolution - 1){
-            rightSide.push({x:peakArray[i].x ,y:peakArray[i].y });  
+          //after this, do same for beginning edge case and end edge case
+          //then write algo for detecting smooth moving graph (Alphabet stock) and make it plot better for those
+          //after then fix issue with alphabet stock where it isn't plotting local min (2024-11-04)
+          let localAvg = subsectionArraySortedByZ[i].y;
+          for (let j = 0; j < byeByeNeighborDistance; j++) {
+            localAvg += all[subsectionArraySortedByZ[i].z - j].y;
+            localAvg += all[subsectionArraySortedByZ[i].z + j].y;
+          }
+          localAvg = localAvg / (byeByeNeighborDistance * 2 + 1);
+          if (subsectionArraySortedByZ[i].y < localAvg) {
+            if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i+1].y) {
+              subsectionArraySortedByZ.splice(i+1, 1);
+            } else {
+              subsectionArraySortedByZ.splice(i, 1);
+            }
           } else {
-            if (valleyArray[i].y === absoluteMaxPeak) {
-              rightSide.push({x:valleyArray[i].x ,y:valleyArray[i].y });
+            if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i+1].y) {
+              subsectionArraySortedByZ.splice(i+1, 1);
+            } else {
+              subsectionArraySortedByZ.splice(i, 1);
             }
           }
-          count++;
-        }
-        peakAndValleyArray = leftSide.concat(rightSide);
-      }
-    } else {
-      // Still broken
-      let count = 0;
-      if (flag === 'valley'){ 
-        count = 0;
-        peakAndValleyArray.push({x:indx, y:val});
-        for (let i = 1; i < resolution; i++) {  
-          if (count % 2 === 0){
-            peakAndValleyArray.push({x:peakArray[i].x ,y:peakArray[i].y });
-          } else if (count !== resolution - 1){
-            peakAndValleyArray.push({x:valleyArray[i].x ,y:valleyArray[i].y });  
-          } else {
-            if (peakArray[i].y === absoluteMaxPeak) {
-              peakAndValleyArray.push({x:peakArray[i].x ,y:peakArray[i].y });
+        } else {
+          //end edge case
+          if (range / Math.abs(subsectionArraySortedByZ[i].y - subsectionArraySortedByZ[i-1].y) > 0.15) {
+            break;
+          }
+          if (subsectionArraySortedByZ[i].z === all.length - 1) {
+            let localAvg = (all[all.length - 1].y + all[all.length - 2].y + all[all.length - 3].y + all[all.length - 4].y + all[all.length - 5].y)/5;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i - 1].y) {
+                subsectionArraySortedByZ.splice(i - 1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            } else {
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i - 1].y) {
+                subsectionArraySortedByZ.splice(i - 1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
             }
           }
-          count++;
-        }
-      } else {
-        count = 0;
-        peakAndValleyArray.push({x:indx, y:val});
-        for (let i = 1; i < resolution; i++) {  
-          if (count % 2 === 0){
-            peakAndValleyArray.push({x:valleyArray[i].x ,y:valleyArray[i].y });
-          } else if (count !== resolution - 1){
-            peakAndValleyArray.push({x:peakArray[i].x ,y:peakArray[i].y });  
-          } else {
-            if (valleyArray[i].y === absoluteMaxPeak) {
-              peakAndValleyArray.push({x:valleyArray[i].x ,y:valleyArray[i].y });
+          else if (subsectionArraySortedByZ[i].z === all.length - 2) {
+            let localAvg = (all[all.length - 1].y + all[all.length - 2].y + all[all.length - 3].y + all[all.length - 4].y + all[all.length - 5].y)/5;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i-1].y) {
+                subsectionArraySortedByZ.splice(i-1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            } else {
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i-1].y) {
+                subsectionArraySortedByZ.splice(i-1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            }
+          } else if (subsectionArraySortedByZ[i].z === all.length - 3) {
+            let localAvg = (all[all.length - 1].y + all[all.length - 2].y + all[all.length - 3].y + all[all.length - 4].y + all[all.length - 5].y + all[all.length - 6].y)/6;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i - 1].y) {
+                subsectionArraySortedByZ.splice(i - 1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            } else {
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i - 1].y) {
+                subsectionArraySortedByZ.splice(i - 1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            }
+          } else if (subsectionArraySortedByZ[i].z === all.length - 4) {
+            let localAvg = (all[all.length - 1].y + all[all.length - 2].y + all[all.length - 3].y + all[all.length - 4].y + all[all.length - 5].y + all[all.length - 6].y + all[all.length - 7].y)/7;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i - 1].y) {
+                subsectionArraySortedByZ.splice(i - 1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            } else {
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i - 1].y) {
+                subsectionArraySortedByZ.splice(i - 1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            }
+          } else if (subsectionArraySortedByZ[i].z === all.length - 5) {
+            let localAvg = (all[all.length - 1].y + all[all.length - 2].y + all[all.length - 3].y + all[all.length - 4].y + all[all.length - 5].y + all[all.length - 6].y + all[all.length - 7].y + all[all.length - 8].y)/8;
+            if (subsectionArraySortedByZ[i].y < localAvg) {
+              if (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i - 1].y) {
+                subsectionArraySortedByZ.splice(i - 1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
+            } else {
+              if (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i - 1].y) {
+                subsectionArraySortedByZ.splice(i - 1, 1);
+              } else {
+                subsectionArraySortedByZ.splice(i, 1);
+              }
             }
           }
-          count++;
         }
       }
     }
-    //peakAndValleyArray.push({x:'2023-10-31 11:55:00', y:405});
+
+    //!!Next, pull in DexScreener!! ...Maaybe lol
+
+    //if point has smaller point behind it and larger point in front of it, set to zero, this is mid-slope noise
+    for (let i = 1; i < subsectionArraySortedByZ.length-1; i++) {
+      //up slope
+      if ((subsectionArraySortedByZ[i-1].y < subsectionArraySortedByZ[i].y) && (subsectionArraySortedByZ[i].y < subsectionArraySortedByZ[i+1].y)) {
+        subsectionArraySortedByZ[i].x = '0';
+      }
+      //down slope
+      if ((subsectionArraySortedByZ[i-1].y > subsectionArraySortedByZ[i].y) && (subsectionArraySortedByZ[i].y > subsectionArraySortedByZ[i+1].y)) {
+        subsectionArraySortedByZ[i].x = '0';
+      }
+    }
+
+    for (let i = 0; i < subsectionArraySortedByZ.length; i++) {
+      if (subsectionArraySortedByZ[i].x !== '0') {
+        peakAndValleyArray.push({x:subsectionArraySortedByZ[i].x, y:subsectionArraySortedByZ[i].y});
+      }
+    }
+
     return peakAndValleyArray;
   }
 
@@ -749,7 +734,6 @@ export class AppComponent implements AfterViewInit{
     let blahh = this.datepipe.transform(blah, 'YYYY-MM-dd');
     return blahh!.toString();
   }
-
 
   public fibonacciFinder(peakAndValleyArray: Array<{x:string, y:number}>): [Array<{x:string, y:number}>, Array<{x:string, y:number}>, boolean] {
     let fibPoints1 = []; //when point is successfully found (near .618 or .382) or initial 100% points
@@ -803,10 +787,10 @@ export class AppComponent implements AfterViewInit{
           bullishCrabPoints.push(peakAndValleyArray[i+4]);
           projectedPoints.push(peakAndValleyArray[i+4]);
           secondPointXCoord = this.generatePredictedEndpointXCoord();
-          secondPointYCoord = (projectedPoints[0].y + ((this.absoluteMax - projectedPoints[0].y) / 2));
+          secondPointYCoord = (projectedPoints[0].y * 1.04);
           projectedPoints.push({x:secondPointXCoord, y:secondPointYCoord});
           
-          if (peakAndValleyArray[i+4].x  === peakAndValleyArray[peakAndValleyArray.length-1].x) {
+          if (peakAndValleyArray[i+4].x === peakAndValleyArray[peakAndValleyArray.length-1].x) {
             isLatestTrend = true;
           }
         
@@ -864,7 +848,7 @@ export class AppComponent implements AfterViewInit{
           bullishSharkPoints.push(peakAndValleyArray[i+4]);
           projectedPoints.push(peakAndValleyArray[i+4]);
           secondPointXCoord = this.generatePredictedEndpointXCoord();
-          secondPointYCoord = (projectedPoints[0].y + ((this.absoluteMax - projectedPoints[0].y) / 2));
+          secondPointYCoord = (projectedPoints[0].y * 1.04);
           projectedPoints.push({x:secondPointXCoord, y:secondPointYCoord});
           
           if (peakAndValleyArray[i+4].x  === peakAndValleyArray[peakAndValleyArray.length-1].x) {
@@ -925,7 +909,7 @@ export class AppComponent implements AfterViewInit{
           bullishBatPoints.push(peakAndValleyArray[i+4]);
           projectedPoints.push(peakAndValleyArray[i+4]);
           secondPointXCoord = this.generatePredictedEndpointXCoord();
-          secondPointYCoord = (projectedPoints[0].y - ((this.absoluteMax - projectedPoints[0].y) / 2));
+          secondPointYCoord = (projectedPoints[0].y * 1.04);
           projectedPoints.push({x:secondPointXCoord, y:secondPointYCoord});
 
           if (peakAndValleyArray[i+4].x  === peakAndValleyArray[peakAndValleyArray.length-1].x) {

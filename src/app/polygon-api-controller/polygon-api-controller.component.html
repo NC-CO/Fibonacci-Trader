@@ -4,7 +4,7 @@
     </div>
     <div>
         <div [formGroup]="loginForm">
-            <mat-form-field class="tp-full-width" style="width:150px">
+            <mat-form-field class="tp-full-width" style="width:150px" class="email">
                 <input matInput placeholder="Email" formControlName="email">
             </mat-form-field>
             <mat-form-field class="tp-full-width" style="width:150px">
@@ -46,7 +46,7 @@
                         [value]="TimeFrame">{{TimeFrame.viewValue}}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <div *ngIf="patternScore != 0">
+            <div *ngIf="patternScore != 0" class="pattern-score">
                 <h2>Pattern accuracy score: </h2>
                 <mat-card>
                     <mat-card-content formControlName="patternScore">

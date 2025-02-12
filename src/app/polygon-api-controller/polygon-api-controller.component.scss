@@ -49,6 +49,9 @@ h3 {
         padding-top: 5%;
         padding-left: 2%;
     }
+    .email {
+        padding-right: 3%;
+    }
 
 }
 
@@ -56,8 +59,13 @@ h3 {
     display: flex;
     justify-content: center;
     width: 140px;
+    padding: 3%;
 }
 
 .mat-form-field{
     font-size: 10px;
+}
+
+.pattern-score {
+    margin-right: 40%;
 }
